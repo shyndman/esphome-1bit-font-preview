@@ -30,14 +30,26 @@ export function layout(engine, text, size) {
   return { vm, glyphs, advance: penX, ink: { has: ink, minX, minY, maxX, maxY } };
 }
 
-// Largest integer font size whose ink is fully contained in `box` (both axes).
-// Top-left anchored, so "contained" means the ink's right/bottom stay inside the box.
-export function fitSize(engine, text, box, min = 6, max = 256) {
+function measure(ink, mode) {
+  if (!ink.has) return { w: 0, h: 0, offsetX: 0, offsetY: 0 };
+  if (mode === 'minimum') {
+    return {
+      w: ink.maxX - ink.minX + 1,
+      h: ink.maxY - ink.minY + 1,
+      offsetX: -ink.minX,
+      offsetY: -ink.minY,
+    };
+  }
+  return { w: ink.maxX + 1, h: ink.maxY + 1, offsetX: 0, offsetY: 0 };
+}
+
+// Largest integer font size whose selected measurement is contained in `box` (both axes).
+export function fitSize(engine, text, box, mode = 'recommended', min = 6, max = 256) {
   if (!text) return Math.min(max, 32);
   const fits = (size) => {
     const { ink } = layout(engine, text, size);
-    if (!ink.has) return true; // whitespace only — any size "fits"
-    return ink.maxX <= box.w - 1 && ink.maxY <= box.h - 1;
+    const measured = measure(ink, mode);
+    return measured.w <= box.w && measured.h <= box.h;
   };
   let lo = min, hi = max, best = min;
   while (lo <= hi) {
@@ -51,16 +63,15 @@ export function fitSize(engine, text, box, min = 6, max = 256) {
 export function renderToCanvas(
   canvas,
   engine,
-  { text, size, box, on = '#cde7ff', off = '#10202c', bg = '#06121a', over = '#ff5a6a' },
+  { text, size, box, mode = 'recommended', on = '#cde7ff', off = '#10202c', bg = '#06121a', over = '#ff5a6a' },
 ) {
-  const { advance, ink, glyphs } = layout(engine, text, size);
+  const { ink, glyphs } = layout(engine, text, size);
+  const measured = measure(ink, mode);
 
   // Grid extent = the device box, expanded to reveal any right/bottom overflow.
-  const inkW = ink.has ? ink.maxX + 1 : 0;
-  const inkH = ink.has ? ink.maxY + 1 : 0;
-  const cols = Math.max(1, box.w, inkW);
-  const rows = Math.max(1, box.h, inkH);
-  const overflow = ink.has && (ink.maxX >= box.w || ink.maxY >= box.h);
+  const cols = Math.max(1, box.w, measured.w);
+  const rows = Math.max(1, box.h, measured.h);
+  const overflow = ink.has && (measured.w > box.w || measured.h > box.h);
 
   // Pack ink into a 1-bit grid (clipped to the extent; top-left aligned so coords ≥ 0).
   const grid = new Uint8Array(cols * rows);
@@ -68,13 +79,11 @@ export function renderToCanvas(
     for (let gy = 0; gy < g.h; gy++)
       for (let gx = 0; gx < g.w; gx++)
         if (g.pixels[gy * g.w + gx]) {
-          const px = x + gx, py = y + gy;
+          const px = x + gx + measured.offsetX, py = y + gy + measured.offsetY;
           if (px >= 0 && px < cols && py >= 0 && py < rows) grid[py * cols + px] = 1;
         }
 
-  const drawn = ink.has
-    ? { w: ink.maxX - ink.minX + 1, h: ink.maxY - ink.minY + 1 }
-    : { w: 0, h: 0 };
+  const drawn = { w: measured.w, h: measured.h };
 
   // Hold the default scale while it fits, then scale down by shrinking the cell
   // pitch — never by CSS-resampling the canvas. The pitch is an integer number of
@@ -121,5 +130,5 @@ export function renderToCanvas(
     for (let py = 1; py < rows; py++) ctx.fillRect(0, py * pitch - gap, canvas.width, gap);
   }
 
-  return { drawn, box: { w: box.w, h: box.h }, advance, overflow };
+  return { drawn, overflow };
 }

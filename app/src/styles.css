@@ -129,10 +129,33 @@ select.weight {
   gap: 6px;
 }
 .device-row input[type="number"] {
-  width: 84px;
+  width: 94px;
 }
 .device-row .x {
   color: var(--muted);
+}
+.modeseg {
+  display: flex;
+  gap: 4px;
+}
+.modebtn {
+  background: #0b1620;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+.modebtn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.modebtn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04121f;
+  font-weight: 600;
 }
 .device,
 .refit {
@@ -143,6 +166,10 @@ select.weight {
   padding: 8px 10px;
   font: inherit;
   cursor: pointer;
+}
+.refit {
+  padding-left: 15px;
+  padding-right: 15px;
 }
 .device:hover,
 .refit:hover {

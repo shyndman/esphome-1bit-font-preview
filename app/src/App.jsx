@@ -31,6 +31,11 @@ const WEIGHT_LABELS = {
   900: "Black",
 };
 
+const FIT_MODES = [
+  { value: "recommended", label: "Recommended" },
+  { value: "minimum", label: "Minimum" },
+];
+
 const ttfCache = new Map();
 async function fetchTtf(url) {
   if (!ttfCache.has(url)) {
@@ -50,6 +55,7 @@ export default function App() {
   const [size, setSize] = createSignal(32);
   const [text, setText] = createSignal("Hello, world!");
   const [device, setDevice] = createSignal({ w: DEVICES[1].w, h: DEVICES[1].h });
+  const [fitMode, setFitMode] = createSignal("recommended");
   const [error, setError] = createSignal("");
   const [dims, setDims] = createSignal(null);
 
@@ -93,10 +99,10 @@ export default function App() {
     },
   );
 
-  // Refit: pick the largest size whose ink is contained in the current device box.
+  // Refit: pick the largest size whose selected measurement is contained in the current device box.
   const refit = () => {
     if (!engine() || !face()) return;
-    setSize(fitSize(engine(), untrack(text), untrack(device)));
+    setSize(fitSize(engine(), untrack(text), untrack(device), fitMode()));
   };
 
   // Auto-refit when the font face changes (family/style/weight) — a new face is a
@@ -107,12 +113,13 @@ export default function App() {
     untrack(refit);
   });
 
-  // (re)render whenever face / size / text / device / viewport changes
+  // (re)render whenever face / size / text / device / fit mode / viewport changes
   createEffect(() => {
     if (!engine() || !face() || !canvas) return;
     text();
     size();
     device();
+    fitMode();
     viewport();
     try {
       setDims(
@@ -120,6 +127,7 @@ export default function App() {
           text: text(),
           size: size(),
           box: device(),
+          mode: fitMode(),
         }),
       );
       setError("");
@@ -248,14 +256,30 @@ export default function App() {
           </div>
           </label>
 
+          <div class="field fitmode">
+            <span>Measure</span>
+            <div class="modeseg" role="radiogroup" aria-label="Measurement mode">
+              <For each={FIT_MODES}>
+                {(m) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={fitMode() === m.value}
+                    classList={{ modebtn: true, active: fitMode() === m.value }}
+                    onClick={() => setFitMode(m.value)}
+                  >
+                    {m.label}
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+
           <Show when={dims()}>
             <div class="field dims">
               <strong>
-                minimum bounds {dims().drawn.w}×{dims().drawn.h}
+                {fitMode() === "minimum" ? "minimum" : "recommended"} bounds {dims().drawn.w}×{dims().drawn.h}
               </strong>
-              <span>
-                device {dims().box.w}×{dims().box.h}
-              </span>
               <Show when={dims().overflow}>
                 <span class="oob">out of bounds</span>
               </Show>
