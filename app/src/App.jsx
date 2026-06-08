@@ -11,6 +11,7 @@ import { loadCatalog, familyNames, weightsFor, ttfUrl } from "./catalog.js";
 import { createEngine } from "./ftengine.js";
 import { renderToCanvas, fitSize } from "./render.js";
 import { FontPicker } from "./FontPicker.jsx";
+import { readUrlState, writeUrlState, PARAM_DEFAULTS } from "./urlState.js";
 
 // Common SSD1306-class OLED panels (and clones). The box is the fixed constraint.
 const DEVICES = [
@@ -59,13 +60,16 @@ export default function App() {
   const [catalog] = createResource(loadCatalog);
   const [engine] = createResource(createEngine);
 
-  const [family, setFamily] = createSignal("Roboto");
-  const [style, setStyle] = createSignal("normal");
-  const [weight, setWeight] = createSignal(400);
+  // Hydrate the user-controlled state from the URL once at startup. `size` is
+  // not persisted: auto-refit recomputes it (see serialize effect below).
+  const initial = readUrlState();
+  const [family, setFamily] = createSignal(initial.family);
+  const [style, setStyle] = createSignal(initial.style);
+  const [weight, setWeight] = createSignal(initial.weight);
   const [size, setSize] = createSignal(32);
-  const [text, setText] = createSignal("Hello, world!");
-  const [device, setDevice] = createSignal({ w: DEVICES[1].w, h: DEVICES[1].h });
-  const [fitMode, setFitMode] = createSignal("recommended");
+  const [text, setText] = createSignal(initial.text);
+  const [device, setDevice] = createSignal({ w: initial.w, h: initial.h });
+  const [fitMode, setFitMode] = createSignal(initial.mode);
   const [error, setError] = createSignal("");
   const [dims, setDims] = createSignal(null);
 
@@ -86,6 +90,13 @@ export default function App() {
     const w = weights();
     if (w.length && !w.includes(weight()))
       setWeight(w.includes(400) ? 400 : w[0]);
+  });
+
+  // keep family valid once the catalog resolves (a shared URL may name a family
+  // we don't ship); fall back to the default rather than wedging the picker.
+  createEffect(() => {
+    const ns = names();
+    if (ns.length && !ns.includes(family())) setFamily(PARAM_DEFAULTS.family);
   });
 
   // load the selected face into the engine
@@ -145,6 +156,25 @@ export default function App() {
       setError(String(e.message || e));
     }
   });
+
+  // Mirror the persisted state back to the URL, debounced so rapid typing/drag
+  // doesn't thrash history. `size` is deliberately not read: it isn't persisted,
+  // so auto-refit never touches the URL.
+  let urlTimer;
+  createEffect(() => {
+    const snapshot = {
+      text: text(),
+      family: family(),
+      style: style(),
+      weight: weight(),
+      w: device().w,
+      h: device().h,
+      mode: fitMode(),
+    };
+    clearTimeout(urlTimer);
+    urlTimer = setTimeout(() => writeUrlState(snapshot), 250);
+  });
+  onCleanup(() => clearTimeout(urlTimer));
 
   return (
     <div class="app">
