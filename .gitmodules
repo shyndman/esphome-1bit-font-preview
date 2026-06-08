@@ -1,0 +1,6 @@
+[submodule "lib/google-fonts-complete"]
+	path = lib/google-fonts-complete
+	url = https://github.com/jonathantneal/google-fonts-complete.git
+[submodule "lib/freetype.wasm"]
+	path = lib/freetype.wasm
+	url = https://github.com/discere-os/freetype.wasm

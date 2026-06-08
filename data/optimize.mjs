@@ -1,9 +1,13 @@
 // Shrink google-fonts.json for our use: keep TTF URLs only, dedupe unicode ranges.
 import { readFileSync as rf, writeFileSync as wf } from 'node:fs';
 import { gzipSync as gz } from 'node:zlib';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-const SRC = 'data/google-fonts.json';
-const OUT = 'data/fonts.json';
+// Resolve relative to repo root (this script lives in data/), so it runs from anywhere.
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const SRC = join(ROOT, 'lib/google-fonts-complete/google-fonts.json');
+const OUT = join(ROOT, 'app/public/fonts.json');
 
 const d = JSON.parse(rf(SRC, 'utf8'));
 

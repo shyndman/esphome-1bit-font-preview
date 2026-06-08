@@ -1,4 +1,6 @@
-lib
+lib/*
+!lib/google-fonts-complete
+!lib/freetype.wasm
 app/dist
 node_modules
 work
