@@ -16,7 +16,7 @@ const EXCLUDED = new Set([
 
 let cache;
 export async function loadCatalog() {
-  if (!cache) cache = await (await fetch('/fonts.json')).json();
+  if (!cache) cache = await (await fetch(`${import.meta.env.BASE_URL}fonts.json`)).json();
   return cache;
 }
 

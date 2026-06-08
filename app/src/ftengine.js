@@ -3,10 +3,11 @@
 
 let modulePromise;
 function getModule() {
-  // ftrender.mjs lives in /public/wasm and resolves ftrender.wasm relative to itself.
-  // Use a runtime absolute URL so neither Vite's dev import-analysis nor Rollup
-  // tries to bundle the emscripten glue.
-  const url = `${location.origin}/wasm/ftrender.mjs`;
+  // ftrender.mjs lives in <base>/wasm and resolves ftrender.wasm relative to itself.
+  // Use a runtime absolute URL (origin + Vite base) so neither Vite's dev
+  // import-analysis nor Rollup tries to bundle the emscripten glue, and so it
+  // resolves correctly under a GitHub Pages project subpath.
+  const url = `${location.origin}${import.meta.env.BASE_URL}wasm/ftrender.mjs`;
   modulePromise ??= import(/* @vite-ignore */ url).then((m) => m.default());
   return modulePromise;
 }
