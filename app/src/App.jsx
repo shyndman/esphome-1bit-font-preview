@@ -36,6 +36,16 @@ const FIT_MODES = [
   { value: "minimum", label: "Minimum" },
 ];
 
+// Hold Shift while pressing Up/Down on a numeric input to jump by 10 instead of 1.
+const SHIFT_STEP = 10;
+function shiftStep(e, value, setValue, min, max) {
+  if (!e.shiftKey) return;
+  if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+  e.preventDefault();
+  const delta = e.key === "ArrowUp" ? SHIFT_STEP : -SHIFT_STEP;
+  setValue(Math.min(max, Math.max(min, value + delta)));
+}
+
 const ttfCache = new Map();
 async function fetchTtf(url) {
   if (!ttfCache.has(url)) {
@@ -205,6 +215,7 @@ export default function App() {
             max="256"
             value={size()}
             onInput={(e) => setSize(Number(e.currentTarget.value) || 8)}
+            onKeyDown={(e) => shiftStep(e, size(), setSize, 6, 256)}
           />
           </label>
         </div>
@@ -239,6 +250,9 @@ export default function App() {
               onInput={(e) =>
                 setDevice((d) => ({ ...d, w: Number(e.currentTarget.value) || 8 }))
               }
+              onKeyDown={(e) =>
+                shiftStep(e, device().w, (v) => setDevice((d) => ({ ...d, w: v })), 8, 512)
+              }
             />
             <span class="x">×</span>
             <input
@@ -248,6 +262,9 @@ export default function App() {
               value={device().h}
               onInput={(e) =>
                 setDevice((d) => ({ ...d, h: Number(e.currentTarget.value) || 8 }))
+              }
+              onKeyDown={(e) =>
+                shiftStep(e, device().h, (v) => setDevice((d) => ({ ...d, h: v })), 8, 512)
               }
             />
             <button type="button" class="refit" onClick={refit}>
