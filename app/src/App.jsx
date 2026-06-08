@@ -178,7 +178,7 @@ export default function App() {
 
   return (
     <div class="app">
-      <h1>ESPHome mono font preview</h1>
+      <h1>ESPHome 1-bit Font Preview</h1>
       <p class="sub">FreeType 2.14.3 · no HarfBuzz · byte-exact with ESPHome</p>
 
       <div class="controls">
