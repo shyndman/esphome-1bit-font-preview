@@ -274,23 +274,25 @@ export default function App() {
               </For>
             </div>
           </div>
-
-          <Show when={dims()}>
-            <div class="field dims">
-              <strong>
-                {fitMode() === "minimum" ? "minimum" : "recommended"} bounds {dims().drawn.w}×{dims().drawn.h}
-              </strong>
-              <Show when={dims().overflow}>
-                <span class="oob">out of bounds</span>
-              </Show>
-            </div>
-          </Show>
         </div>
       </div>
 
       <div class="screen">
         <Show when={!error()} fallback={<div class="error">{error()}</div>}>
-          <canvas ref={canvas} />
+          <div class="canvas-wrap">
+            <canvas ref={canvas} />
+            <Show when={dims()}>
+              <span
+                classList={{ "bound-tag": true, overflow: dims().overflow }}
+                style={{
+                  left: `${dims().corner.x}px`,
+                  top: `${dims().corner.y}px`,
+                }}
+              >
+                {dims().drawn.w}×{dims().drawn.h}
+              </span>
+            </Show>
+          </div>
         </Show>
       </div>
     </div>

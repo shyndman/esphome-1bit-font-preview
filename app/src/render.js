@@ -60,10 +60,35 @@ export function fitSize(engine, text, box, mode = 'recommended', min = 6, max = 
   return best;
 }
 
+// Draw a 1px rectangle around the active measurement region (top-left anchored).
+// Edges are painted as fillRects at integer coords (no AA, matches the pixel grid).
+// The right/bottom edges inset by 1px so the stroke stays visible when the rect
+// hugs the canvas edge during overflow.
+function strokeBounds(ctx, wCells, hCells, pitch, color, maxW, maxH) {
+  if (wCells <= 0 || hCells <= 0) return;
+  const x1 = Math.min(wCells * pitch - 1, maxW - 1);
+  const y1 = Math.min(hCells * pitch - 1, maxH - 1);
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, x1 + 1, 1);   // top
+  ctx.fillRect(0, y1, x1 + 1, 1);  // bottom
+  ctx.fillRect(0, 0, 1, y1 + 1);   // left
+  ctx.fillRect(x1, 0, 1, y1 + 1);  // right
+}
+
 export function renderToCanvas(
   canvas,
   engine,
-  { text, size, box, mode = 'recommended', on = '#cde7ff', off = '#10202c', bg = '#06121a', over = '#ff5a6a' },
+  {
+    text,
+    size,
+    box,
+    mode = 'recommended',
+    on = '#3fb6ff',
+    off = '#0b0e11',
+    bg = '#060708',
+    over = '#ff5a6a',
+    bound = '#ffb648',
+  },
 ) {
   const { ink, glyphs } = layout(engine, text, size);
   const measured = measure(ink, mode);
@@ -91,7 +116,10 @@ export function renderToCanvas(
   // gap between cells is exactly one physical pixel at every scale (a fractional CSS
   // scale would make some 1px gaps vanish and others survive).
   const dpr = window.devicePixelRatio || 1;
-  const parent = canvas.parentElement;
+  // Measure the full-bleed container, not the canvas's immediate wrapper: the
+  // wrapper shrinks to the canvas (for tag alignment), so measuring it would be
+  // circular and collapse the pitch.
+  const parent = canvas.closest('.screen') || canvas.parentElement;
   const cs = parent && getComputedStyle(parent);
   const padX = cs ? parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) : 0;
   const availDev = Math.max(1, (parent?.clientWidth || 800) - padX) * dpr;
@@ -130,5 +158,15 @@ export function renderToCanvas(
     for (let py = 1; py < rows; py++) ctx.fillRect(0, py * pitch - gap, canvas.width, gap);
   }
 
-  return { drawn, overflow };
+  // Pass 3: outline the active bounds (amber, or red when it spills past the box).
+  strokeBounds(ctx, measured.w, measured.h, pitch, overflow ? over : bound, canvas.width, canvas.height);
+
+  // Bottom-right corner of the bounds rect, in CSS px relative to the canvas origin,
+  // so the floating tag can sit at that corner instead of the canvas edge.
+  const corner = {
+    x: Math.min(measured.w * pitch, canvas.width) / dpr,
+    y: Math.min(measured.h * pitch, canvas.height) / dpr,
+  };
+
+  return { drawn, overflow, corner };
 }
