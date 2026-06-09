@@ -147,12 +147,12 @@ select.weight {
   padding: 2px 4px;
   border-radius: 6px;
   cursor: pointer;
+  outline: none;
 }
-.preset-row:hover {
-  background: #0b1620;
-}
-.preset-row.active {
-  background: var(--accent);
+/* highlight = hover or keyboard focus, mirroring .cb-item[data-highlighted] */
+.preset-row:hover,
+.preset-row:focus-within {
+  background: #172735;
 }
 .preset-res {
   flex: 0 0 64px;
@@ -161,9 +161,14 @@ select.weight {
   font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
+/* selection = current device resolution, mirroring .cb-item[data-selected] + .cb-check */
 .preset-row.active .preset-res {
-  color: #04121f;
+  color: #fff;
   font-weight: 600;
+}
+.preset-check {
+  margin-left: auto;
+  color: var(--accent);
 }
 .preset-chips {
   display: flex;
@@ -181,7 +186,9 @@ select.weight {
   text-transform: none;
   cursor: pointer;
 }
-.preset-chip:hover {
+.preset-chip:hover,
+.preset-chip:focus {
+  outline: none;
   border-color: var(--chip, var(--accent));
   background: color-mix(in srgb, var(--chip, var(--accent)) 14%, #0b1620);
 }
