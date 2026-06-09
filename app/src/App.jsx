@@ -212,8 +212,8 @@ export default function App() {
           </div>
 
           <label class="field gdisplay">
-          <span class="device-label">
-            Display (px)
+          <span class="device-label">Display (px)</span>
+          <div class="device-row">
             <DevicePresets
               value={device()}
               onResolution={(r) => setDevice({ w: r.w, h: r.h })}
@@ -222,8 +222,6 @@ export default function App() {
                 setBpp(d.bpp);
               }}
             />
-          </span>
-          <div class="device-row">
             <input
               type="number"
               min="8"
