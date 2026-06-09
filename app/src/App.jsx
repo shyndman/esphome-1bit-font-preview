@@ -15,9 +15,9 @@ import { readUrlState, writeUrlState, PARAM_DEFAULTS } from "./urlState.js";
 
 // Common SSD1306-class OLED panels (and clones). The box is the fixed constraint.
 const DEVICES = [
-  { label: "128×32", w: 128, h: 32 },
-  { label: "128×64", w: 128, h: 64 },
-  { label: "128×128", w: 128, h: 128 },
+  { label: "128\u00d732", w: 128, h: 32 },
+  { label: "128\u00d764", w: 128, h: 64 },
+  { label: "128\u00d7128", w: 128, h: 128 },
 ];
 
 const WEIGHT_LABELS = {
@@ -198,6 +198,98 @@ export default function App() {
 
       <div class="controls">
         <div class="row">
+          <div class="field fitmode">
+            <span>Measure</span>
+            <div class="modeseg" role="radiogroup" aria-label="Measurement mode">
+              <For each={FIT_MODES}>
+                {(m) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={fitMode() === m.value}
+                    classList={{ modebtn: true, active: fitMode() === m.value }}
+                    onClick={() => setFitMode(m.value)}
+                  >
+                    {m.label}
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+
+          <label class="field gdisplay">
+          <span class="device-label">
+            Display (px)
+            <span class="presets">
+              <For each={DEVICES}>
+                {(d) => (
+                  <button
+                    type="button"
+                    classList={{
+                      preset: true,
+                      active: device().w === d.w && device().h === d.h,
+                    }}
+                    onClick={() => setDevice({ w: d.w, h: d.h })}
+                  >
+                    {d.label}
+                  </button>
+                )}
+              </For>
+            </span>
+          </span>
+          <div class="device-row">
+            <input
+              type="number"
+              min="8"
+              max="512"
+              value={device().w}
+              onInput={(e) =>
+                setDevice((d) => ({ ...d, w: Number(e.currentTarget.value) || 8 }))
+              }
+              onKeyDown={(e) =>
+                shiftStep(e, device().w, (v) => setDevice((d) => ({ ...d, w: v })), 8, 512)
+              }
+            />
+            <span class="x">×</span>
+            <input
+              type="number"
+              min="8"
+              max="512"
+              value={device().h}
+              onInput={(e) =>
+                setDevice((d) => ({ ...d, h: Number(e.currentTarget.value) || 8 }))
+              }
+              onKeyDown={(e) =>
+                shiftStep(e, device().h, (v) => setDevice((d) => ({ ...d, h: v })), 8, 512)
+              }
+            />
+            <button type="button" class="refit" onClick={refit}>
+              Refit
+            </button>
+          </div>
+          </label>
+
+          <div class="field bpp">
+            <span>Bit depth</span>
+            <div class="modeseg" role="radiogroup" aria-label="Bit depth">
+              <For each={BPP_OPTIONS}>
+                {(b) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={bpp() === b.value}
+                    classList={{ modebtn: true, active: bpp() === b.value }}
+                    onClick={() => setBpp(b.value)}
+                  >
+                    {b.label}
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
           <label class="field text">
             <span>Text</span>
             <input
@@ -265,97 +357,6 @@ export default function App() {
           </label>
         </div>
 
-        <div class="row">
-          <label class="field gdisplay">
-          <span class="device-label">
-            Display (px)
-            <span class="presets">
-              <For each={DEVICES}>
-                {(d) => (
-                  <button
-                    type="button"
-                    classList={{
-                      preset: true,
-                      active: device().w === d.w && device().h === d.h,
-                    }}
-                    onClick={() => setDevice({ w: d.w, h: d.h })}
-                  >
-                    {d.label}
-                  </button>
-                )}
-              </For>
-            </span>
-          </span>
-          <div class="device-row">
-            <input
-              type="number"
-              min="8"
-              max="512"
-              value={device().w}
-              onInput={(e) =>
-                setDevice((d) => ({ ...d, w: Number(e.currentTarget.value) || 8 }))
-              }
-              onKeyDown={(e) =>
-                shiftStep(e, device().w, (v) => setDevice((d) => ({ ...d, w: v })), 8, 512)
-              }
-            />
-            <span class="x">×</span>
-            <input
-              type="number"
-              min="8"
-              max="512"
-              value={device().h}
-              onInput={(e) =>
-                setDevice((d) => ({ ...d, h: Number(e.currentTarget.value) || 8 }))
-              }
-              onKeyDown={(e) =>
-                shiftStep(e, device().h, (v) => setDevice((d) => ({ ...d, h: v })), 8, 512)
-              }
-            />
-            <button type="button" class="refit" onClick={refit}>
-              Refit
-            </button>
-          </div>
-          </label>
-
-          <div class="field fitmode">
-            <span>Measure</span>
-            <div class="modeseg" role="radiogroup" aria-label="Measurement mode">
-              <For each={FIT_MODES}>
-                {(m) => (
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={fitMode() === m.value}
-                    classList={{ modebtn: true, active: fitMode() === m.value }}
-                    onClick={() => setFitMode(m.value)}
-                  >
-                    {m.label}
-                  </button>
-                )}
-              </For>
-            </div>
-          </div>
-
-          <div class="field bpp">
-            <span>Bit depth</span>
-            <div class="modeseg" role="radiogroup" aria-label="Bit depth">
-              <For each={BPP_OPTIONS}>
-                {(b) => (
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={bpp() === b.value}
-                    classList={{ modebtn: true, active: bpp() === b.value }}
-                    onClick={() => setBpp(b.value)}
-                  >
-                    {b.label}
-                  </button>
-                )}
-              </For>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="screen">

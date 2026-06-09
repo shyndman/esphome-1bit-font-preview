@@ -61,6 +61,13 @@ h1 {
   letter-spacing: 0.05em;
   color: var(--muted);
 }
+/* subtle vertical rules between the groups in the top (canvas) row */
+.controls > .row:first-child > .field + .field {
+  align-self: stretch;
+  justify-content: flex-end;
+  border-left: 1px solid var(--line);
+  padding-left: 16px;
+}
 .field.text {
   flex: 1;
 }
