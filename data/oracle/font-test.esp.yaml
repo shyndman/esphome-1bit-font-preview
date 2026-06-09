@@ -1,0 +1,119 @@
+esphome:
+  name: font-test
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+
+api:
+  encryption:
+    key: "NnsJLrTlphoZQAciQxtkczYLK87uIAc7lM4M9zs4GDY="
+
+ota:
+  - platform: esphome
+    password: "fonttest-ota-password"
+
+wifi:
+  ssid: "FakeNetwork"
+  password: "fakepassword123"
+
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+
+font:
+  # Roboto 16
+  - file: "gfonts://Roboto"
+    id: roboto_16_1
+    size: 16
+    bpp: 1
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Roboto"
+    id: roboto_16_2
+    size: 16
+    bpp: 2
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Roboto"
+    id: roboto_16_4
+    size: 16
+    bpp: 4
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Roboto"
+    id: roboto_16_8
+    size: 16
+    bpp: 8
+    glyphs: ["H", "G", "@", "1", "W"]
+  # Roboto 32
+  - file: "gfonts://Roboto"
+    id: roboto_32_1
+    size: 32
+    bpp: 1
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Roboto"
+    id: roboto_32_2
+    size: 32
+    bpp: 2
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Roboto"
+    id: roboto_32_4
+    size: 32
+    bpp: 4
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Roboto"
+    id: roboto_32_8
+    size: 32
+    bpp: 8
+    glyphs: ["H", "G", "@", "1", "W"]
+  # Bungee 16
+  - file: "gfonts://Bungee"
+    id: bungee_16_1
+    size: 16
+    bpp: 1
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Bungee"
+    id: bungee_16_2
+    size: 16
+    bpp: 2
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Bungee"
+    id: bungee_16_4
+    size: 16
+    bpp: 4
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Bungee"
+    id: bungee_16_8
+    size: 16
+    bpp: 8
+    glyphs: ["H", "G", "@", "1", "W"]
+  # Bungee 32
+  - file: "gfonts://Bungee"
+    id: bungee_32_1
+    size: 32
+    bpp: 1
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Bungee"
+    id: bungee_32_2
+    size: 32
+    bpp: 2
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Bungee"
+    id: bungee_32_4
+    size: 32
+    bpp: 4
+    glyphs: ["H", "G", "@", "1", "W"]
+  - file: "gfonts://Bungee"
+    id: bungee_32_8
+    size: 32
+    bpp: 8
+    glyphs: ["H", "G", "@", "1", "W"]
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    lambda: |-
+      it.print(0, 0, id(roboto_32_1), "HG@1W");
+      it.print(0, 32, id(bungee_32_1), "HG@1W");

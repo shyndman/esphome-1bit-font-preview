@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "fonts": "node ../data/optimize.mjs"
+    "fonts": "node ../data/optimize.mjs",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "@kobalte/core": "^0.13.0",

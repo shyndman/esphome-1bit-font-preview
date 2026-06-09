@@ -1,6 +1,8 @@
-/* Minimal FreeType mono render API for the browser, mirroring ESPHome's
- * glyph_to_glyphinfo (bpp=1): FT_LOAD_RENDER | FT_LOAD_TARGET_MONO, pt_to_px metrics.
- * Compiled to wasm; JS reads the MONO bitmap buffer directly. */
+/* Minimal FreeType render API for the browser, mirroring ESPHome's
+ * glyph_to_glyphinfo: pt_to_px metrics, and per-bpp load flags.
+ * bpp==1  -> FT_LOAD_RENDER | FT_LOAD_TARGET_MONO  (1 bit/pixel, MSB-first)
+ * bpp>1   -> FT_LOAD_RENDER | FT_LOAD_NO_BITMAP    (FT_PIXEL_MODE_GRAY, 1 byte/pixel)
+ * Compiled to wasm; JS reads the bitmap buffer directly and branches on bpp. */
 #include <emscripten.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -19,8 +21,10 @@ EMSCRIPTEN_KEEPALIVE int ft_new_face(const unsigned char *data, int len) {
 
 EMSCRIPTEN_KEEPALIVE int ft_set_px(int px) { return FT_Set_Pixel_Sizes(g_face, px, 0); }
 
-EMSCRIPTEN_KEEPALIVE int ft_load(unsigned int codepoint) {
-    return FT_Load_Char(g_face, codepoint, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
+EMSCRIPTEN_KEEPALIVE int ft_load(unsigned int codepoint, int bpp) {
+    FT_Int32 flags = bpp == 1 ? (FT_LOAD_RENDER | FT_LOAD_TARGET_MONO)
+                              : (FT_LOAD_RENDER | FT_LOAD_NO_BITMAP);
+    return FT_Load_Char(g_face, codepoint, flags);
 }
 
 /* glyph accessors (valid after ft_load) */

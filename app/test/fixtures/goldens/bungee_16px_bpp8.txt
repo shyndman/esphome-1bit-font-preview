@@ -1,0 +1,74 @@
+# bungee 16px bpp8 — extracted from ESPHome main.cpp (oracle)
+
+glyph U+0031 w=8 h=12 ox=1 oy=5 adv=10
+97ffffffffe90000
+acffffffffff0000
+a4ffffffffff0000
+0f2cadffffff0000
+00009cffffff0000
+00009cffffff0000
+00009cffffff0000
+00009cffffff0000
+1d2cadffffff2c1e
+f8fffffffffffff8
+ffffffffffffffff
+eaffffffffffffeb
+
+glyph U+0040 w=12 h=15 ox=1 oy=3 adv=14
+00085d9fc4d1d2c49e5c0800
+1fdcffffffffffffffffdc1f
+abffcb4f1906071a52d0ffaa
+eef61000000000000015f8ed
+ffd91cafeefeffffffcbdaff
+ffd8acffffffffffffd8d8ff
+ffd8d5ffff3218ffffd8d8ff
+ffd8d8ffff0000ffffd8d8ff
+ffd8d8ffff0000ffffd8d8fe
+ffd8d3ffff3a28ffffd8e3ea
+ffd8a8fffffffffffff6fe9e
+f5f12bbdf4fffffffae3960d
+beffaf2c0100000000000000
+33f1fffff4e0d8d8d8a20000
+001a84c7ebf9ffffffc30000
+
+glyph U+0047 w=10 h=12 ox=1 oy=5 adv=11
+047cd8f9ffffffff7e00
+7dffffffffffffff9400
+dbffffffffffffff8c00
+fcffffd4382c2c2b0a00
+ffffff9c000000000000
+ffffff9c00004f646428
+ffffff9c0000feffff9a
+ffffff9c0000ffffff9c
+fcffffce322cffffff9c
+dbffffffffffffffff9c
+7dffffffffffffffff9c
+047dd9f9ffffffffff85
+
+glyph U+0048 w=10 h=12 ox=1 oy=5 adv=12
+e9ffff82000082ffffe9
+ffffff9c00009cffffff
+ffffff9c00009cffffff
+ffffff9c00009cffffff
+ffffffad2c2cadffffff
+ffffffffffffffffffff
+ffffffffffffffffffff
+ffffffffffffffffffff
+ffffff9c00009cffffff
+ffffff9c00009cffffff
+ffffff9c00009cffffff
+e9ffff87000087ffffe9
+
+glyph U+0057 w=12 h=12 ox=1 oy=5 adv=14
+e9ffff8600000000eaffff84
+ffffff9c00000000ffffff9c
+ffffff9c00000000ffffff9c
+ffffff9c00000000ffffff9c
+ffffff9c65fae318ffffff9c
+ffffffa6e8ffff8effffff9c
+fffffff6fffffff6ffffff9c
+faffffffffffffffffffff96
+d7ffffffff69ccffffffff75
+8fffffffff258bffffffff2d
+35ffffffe6004effffffd100
+00c7ffff93000fe8fffe6600

@@ -37,6 +37,14 @@ const FIT_MODES = [
   { value: "minimum", label: "Minimum" },
 ];
 
+// Bit depth: 1 = mono, 2/4/8 = anti-aliased grayscale (ESPHome's `bpp`).
+const BPP_OPTIONS = [
+  { value: 1, label: "1" },
+  { value: 2, label: "2" },
+  { value: 4, label: "4" },
+  { value: 8, label: "8" },
+];
+
 // Hold Shift while pressing Up/Down on a numeric input to jump by 10 instead of 1.
 const SHIFT_STEP = 10;
 function shiftStep(e, value, setValue, min, max) {
@@ -58,7 +66,9 @@ async function fetchTtf(url) {
 
 export default function App() {
   const [catalog] = createResource(loadCatalog);
-  const [engine] = createResource(createEngine);
+  // Wrap so Solid's resource source (a truthy value) isn't passed as the module
+  // loader arg; createEngine() then uses its default browser loader.
+  const [engine] = createResource(() => createEngine());
 
   // Hydrate the user-controlled state from the URL once at startup. `size` is
   // not persisted: auto-refit recomputes it (see serialize effect below).
@@ -70,6 +80,7 @@ export default function App() {
   const [text, setText] = createSignal(initial.text);
   const [device, setDevice] = createSignal({ w: initial.w, h: initial.h });
   const [fitMode, setFitMode] = createSignal(initial.mode);
+  const [bpp, setBpp] = createSignal(initial.bpp);
   const [error, setError] = createSignal("");
   const [dims, setDims] = createSignal(null);
 
@@ -123,7 +134,7 @@ export default function App() {
   // Refit: pick the largest size whose selected measurement is contained in the current device box.
   const refit = () => {
     if (!engine() || !face()) return;
-    setSize(fitSize(engine(), untrack(text), untrack(device), fitMode()));
+    setSize(fitSize(engine(), untrack(text), untrack(device), fitMode(), bpp()));
   };
 
   // Auto-refit when the font face changes (family/style/weight) — a new face is a
@@ -131,6 +142,7 @@ export default function App() {
   // can type/play past the box and watch the overflow before refitting by hand.
   createEffect(() => {
     face(); // dependency
+    bpp(); // anti-aliasing shifts the ink bounds -> re-fit on bit-depth change
     untrack(refit);
   });
 
@@ -141,6 +153,7 @@ export default function App() {
     size();
     device();
     fitMode();
+    bpp();
     viewport();
     try {
       setDims(
@@ -149,6 +162,7 @@ export default function App() {
           size: size(),
           box: device(),
           mode: fitMode(),
+          bpp: bpp(),
         }),
       );
       setError("");
@@ -170,6 +184,7 @@ export default function App() {
       w: device().w,
       h: device().h,
       mode: fitMode(),
+      bpp: bpp(),
     };
     clearTimeout(urlTimer);
     urlTimer = setTimeout(() => writeUrlState(snapshot), 250);
@@ -178,7 +193,7 @@ export default function App() {
 
   return (
     <div class="app">
-      <h1>ESPHome 1-bit Font Preview</h1>
+      <h1>ESPHome Font Preview</h1>
       <p class="sub">FreeType 2.14.3 · no HarfBuzz · byte-exact with ESPHome</p>
 
       <div class="controls">
@@ -316,6 +331,25 @@ export default function App() {
                     onClick={() => setFitMode(m.value)}
                   >
                     {m.label}
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+
+          <div class="field bpp">
+            <span>Bit depth</span>
+            <div class="modeseg" role="radiogroup" aria-label="Bit depth">
+              <For each={BPP_OPTIONS}>
+                {(b) => (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={bpp() === b.value}
+                    classList={{ modebtn: true, active: bpp() === b.value }}
+                    onClick={() => setBpp(b.value)}
+                  >
+                    {b.label}
                   </button>
                 )}
               </For>

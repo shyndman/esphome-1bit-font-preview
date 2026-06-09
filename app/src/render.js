@@ -4,14 +4,33 @@
 
 const DEFAULT_PITCH = 14; // device px per cell at the default scale
 
+// Linear-interpolate two `#rrggbb` colors per channel. t=0 -> a, t=1 -> b.
+// Mirrors ESPHome Font::print()'s per-channel blend of background and text color.
+function lerpHex(a, b, t) {
+  const ai = parseInt(a.slice(1), 16), bi = parseInt(b.slice(1), 16);
+  const r = Math.round(((ai >> 16) & 255) + (((bi >> 16) & 255) - ((ai >> 16) & 255)) * t);
+  const g = Math.round(((ai >> 8) & 255) + (((bi >> 8) & 255) - ((ai >> 8) & 255)) * t);
+  const bl = Math.round((ai & 255) + ((bi & 255) - (ai & 255)) * t);
+  return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, '0')}`;
+}
+
+// Coverage palette indexed 0..maxCoverage: endpoints are the exact base/ink colors,
+// interior entries are the per-channel lerp. Built once per render, indexed per cell.
+function coveragePalette(base, ink, maxCoverage) {
+  const pal = new Array(maxCoverage + 1);
+  for (let c = 0; c <= maxCoverage; c++)
+    pal[c] = c === 0 ? base : c === maxCoverage ? ink : lerpHex(base, ink, c / maxCoverage);
+  return pal;
+}
+
 // Lay out `text` at `size` and report the glyph placements + true ink bounds.
 // Anchored top-left: pen starts at x=0, baseline at the ascender (top of the box).
-export function layout(engine, text, size) {
+export function layout(engine, text, size, bpp = 1) {
   const vm = engine.setSize(size);
   const glyphs = [];
   let penX = 0;
   for (const ch of text) {
-    const g = engine.glyph(ch.codePointAt(0));
+    const g = engine.glyph(ch.codePointAt(0), bpp);
     glyphs.push({ g, x: penX + g.left, y: vm.ascender - g.top });
     penX += g.advance;
   }
@@ -44,10 +63,10 @@ function measure(ink, mode) {
 }
 
 // Largest integer font size whose selected measurement is contained in `box` (both axes).
-export function fitSize(engine, text, box, mode = 'recommended', min = 6, max = 256) {
+export function fitSize(engine, text, box, mode = 'recommended', bpp = 1, min = 6, max = 256) {
   if (!text) return Math.min(max, 32);
   const fits = (size) => {
-    const { ink } = layout(engine, text, size);
+    const { ink } = layout(engine, text, size, bpp);
     const measured = measure(ink, mode);
     return measured.w <= box.w && measured.h <= box.h;
   };
@@ -83,6 +102,7 @@ export function renderToCanvas(
     size,
     box,
     mode = 'recommended',
+    bpp = 1,
     on = '#3fb6ff',
     off = '#0b0e11',
     bg = '#060708',
@@ -90,7 +110,7 @@ export function renderToCanvas(
     bound = '#ffb648',
   },
 ) {
-  const { ink, glyphs } = layout(engine, text, size);
+  const { ink, glyphs } = layout(engine, text, size, bpp);
   const measured = measure(ink, mode);
 
   // Grid extent = the device box, expanded to reveal any right/bottom overflow.
@@ -98,15 +118,18 @@ export function renderToCanvas(
   const rows = Math.max(1, box.h, measured.h);
   const overflow = ink.has && (measured.w > box.w || measured.h > box.h);
 
-  // Pack ink into a 1-bit grid (clipped to the extent; top-left aligned so coords ≥ 0).
+  // Pack coverage into the grid (clipped to the extent; top-left aligned so coords >= 0).
+  const maxCoverage = (1 << bpp) - 1;
   const grid = new Uint8Array(cols * rows);
   for (const { g, x, y } of glyphs)
     for (let gy = 0; gy < g.h; gy++)
-      for (let gx = 0; gx < g.w; gx++)
-        if (g.pixels[gy * g.w + gx]) {
+      for (let gx = 0; gx < g.w; gx++) {
+        const cov = g.pixels[gy * g.w + gx];
+        if (cov) {
           const px = x + gx + measured.offsetX, py = y + gy + measured.offsetY;
-          if (px >= 0 && px < cols && py >= 0 && py < rows) grid[py * cols + px] = 1;
+          if (px >= 0 && px < cols && py >= 0 && py < rows) grid[py * cols + px] = cov;
         }
+      }
 
   const drawn = { w: measured.w, h: measured.h };
 
@@ -136,13 +159,16 @@ export function renderToCanvas(
   const ctx = canvas.getContext('2d');
 
   // Pass 1: paint every cell at FULL pitch (no gaps). Cells own no part of the grid.
-  //   inside box:  ink → on,   empty → off (the lit device area)
-  //   outside box: ink → over (red), empty → bg (no device there)
+  // Coverage 0 -> base, max -> ink, partial -> per-channel lerp (ESPHome's blend):
+  //   inside box:  base off,  ink on   (the lit device area)
+  //   outside box: base bg,   ink over (red, no device there)
+  const inPal = coveragePalette(off, on, maxCoverage);
+  const outPal = coveragePalette(bg, over, maxCoverage);
   for (let py = 0; py < rows; py++)
     for (let px = 0; px < cols; px++) {
       const inBox = px < box.w && py < box.h;
-      const lit = grid[py * cols + px];
-      ctx.fillStyle = lit ? (inBox ? on : over) : (inBox ? off : bg);
+      const cov = grid[py * cols + px];
+      ctx.fillStyle = inBox ? inPal[cov] : outPal[cov];
       ctx.fillRect(px * pitch, py * pitch, pitch, pitch);
     }
 

@@ -4,6 +4,7 @@
 
 const STYLES = new Set(["normal", "italic"]);
 const MODES = new Set(["recommended", "minimum"]);
+const BPPS = new Set([1, 2, 4, 8]);
 
 const W_MIN = 8;
 const W_MAX = 512;
@@ -18,6 +19,7 @@ export const PARAM_DEFAULTS = {
   w: 128,
   h: 64,
   mode: "recommended",
+  bpp: 1,
 };
 
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
@@ -43,6 +45,7 @@ export function readUrlState() {
   const weight = num("weight");
   const w = num("w");
   const h = num("h");
+  const bpp = num("bpp");
 
   return {
     text: p.get("text") ?? PARAM_DEFAULTS.text,
@@ -52,6 +55,7 @@ export function readUrlState() {
     w: w !== null ? clamp(w, W_MIN, W_MAX) : PARAM_DEFAULTS.w,
     h: h !== null ? clamp(h, W_MIN, W_MAX) : PARAM_DEFAULTS.h,
     mode: enumOr("mode", MODES),
+    bpp: bpp !== null && BPPS.has(bpp) ? bpp : PARAM_DEFAULTS.bpp,
   };
 }
 

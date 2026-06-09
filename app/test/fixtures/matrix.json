@@ -1,0 +1,9 @@
+{
+  "_comment": "Shared golden matrix. Goldens are extracted from real ESPHome codegen output (data/gen-goldens.py reads the generated main.cpp); the WASM engine is asserted against them by app/test/glyphs.test.js. Fonts are ESPHome's own cached TTFs (.esphome/font), so the engine renders byte-identical input. Glyph set H G @ 1 W and the codepoints come from the oracle itself.",
+  "fonts": [
+    { "id": "roboto", "file": "fonts/roboto.ttf" },
+    { "id": "bungee", "file": "fonts/bungee.ttf" }
+  ],
+  "sizes": [16, 32],
+  "bpps": [1, 2, 4, 8]
+}
