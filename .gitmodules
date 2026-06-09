@@ -3,4 +3,5 @@
 	url = https://github.com/jonathantneal/google-fonts-complete.git
 [submodule "lib/freetype.wasm"]
 	path = lib/freetype.wasm
-	url = https://github.com/discere-os/freetype.wasm
+	url = https://github.com/shyndman/freetype.wasm
+	branch = wasm-ft2143

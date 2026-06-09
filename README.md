@@ -64,16 +64,45 @@ npm --prefix app run fonts   # -> regenerates app/public/fonts.json
 
 ## Rebuilding the WASM renderer
 
-The renderer source is [`wasm/ftrender.c`](wasm/ftrender.c), compiled against
-FreeType via the [`discere-os/freetype.wasm`][ftw] toolchain (pinned submodule).
-The compiled artifact is committed under `app/public/wasm/`, so a rebuild is only
-needed when the C source changes.
+The renderer source is [`wasm/ftrender.c`](wasm/ftrender.c), linked against a
+FreeType built for **byte-exact ESPHome parity**: version **2.14.3** (matching
+ESPHome's Homebrew build) with **HarfBuzz disabled**. That archive comes from the
+pinned [`shyndman/freetype.wasm`][ftw] submodule — discere-os's `freetype.wasm`
+build wiring rebased onto FreeType's `VER-2-14-3` tag.
+
+The compiled artifacts are committed under `app/public/wasm/`, so a rebuild is only
+needed when `ftrender.c` (or the FreeType build) changes. To rebuild you need
+[emscripten](https://emscripten.org/) on `PATH` (download it like any other
+toolchain):
+
+```sh
+# 1. Build libfreetype.a (FreeType 2.14.3, HarfBuzz off) from the submodule
+cd lib/freetype.wasm
+meson setup build-wasm --cross-file scripts/emscripten.cross \
+  -Ddefault_library=static -Dbuildtype=release \
+  -Dharfbuzz=disabled -Dpng=disabled -Dbrotli=disabled -Dbzip2=disabled -Dzlib=internal
+meson compile -C build-wasm freetype
+cd ../..
+
+# 2. Link ftrender.c against it -> app/public/wasm/ftrender.{mjs,wasm}
+emcc wasm/ftrender.c lib/freetype.wasm/build-wasm/libfreetype.a \
+  -I lib/freetype.wasm/include -I lib/freetype.wasm/build-wasm \
+  -DFT_CONFIG_OPTIONS_H='<ftoption.h>' -DFT_CONFIG_CONFIG_H='<ftconfig.h>' -O3 \
+  -sMODULARIZE -sEXPORT_ES6 -sEXPORT_NAME=createFT -sALLOW_MEMORY_GROWTH \
+  -sEXPORTED_RUNTIME_METHODS=cwrap,ccall,UTF8ToString,HEAPU8 \
+  -sEXPORTED_FUNCTIONS=_ft_init,_ft_new_face,_ft_set_px,_ft_load,_ft_width,_ft_height,_ft_pitch,_ft_left,_ft_top,_ft_advance,_ft_buffer,_ft_ascender,_ft_descender,_ft_line_height,_malloc,_free \
+  -o app/public/wasm/ftrender.mjs
+```
+
+Then `npm --prefix app test` must stay green — the golden suite is the parity check
+on the rebuild.
 
 ## Credits
 
 - [`jonathantneal/google-fonts-complete`][gfc] — Google Fonts catalog data.
-- [`discere-os/freetype.wasm`][ftw] — FreeType WebAssembly toolchain.
+- [`discere-os/freetype.wasm`](https://github.com/discere-os/freetype.wasm) — the
+  FreeType WebAssembly build wiring this fork is based on.
 - [ESPHome](https://esphome.io/) — the rendering behaviour this mirrors.
 
 [gfc]: https://github.com/jonathantneal/google-fonts-complete
-[ftw]: https://github.com/discere-os/freetype.wasm
+[ftw]: https://github.com/shyndman/freetype.wasm
