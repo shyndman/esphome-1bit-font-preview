@@ -1,0 +1,132 @@
+[
+  {
+    "deviceName": "SSD1306",
+    "resolutions": [[72, 40], [96, 16], [128, 32], [128, 64]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "SH1106",
+    "resolutions": [[96, 16], [128, 32], [128, 64]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "SH1107",
+    "resolutions": [[128, 64], [128, 128]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "SSD1305",
+    "resolutions": [[128, 32], [128, 64]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "SSD1325",
+    "resolutions": [[64, 48], [96, 16], [128, 32], [128, 64]],
+    "maxBpp": 4
+  },
+  {
+    "deviceName": "SSD1322",
+    "resolutions": [[256, 64]],
+    "maxBpp": 4
+  },
+  {
+    "deviceName": "SSD1327",
+    "resolutions": [[128, 128]],
+    "maxBpp": 4
+  },
+  {
+    "deviceName": "SSD1331",
+    "resolutions": [[96, 64]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "SSD1351",
+    "resolutions": [[128, 96], [128, 128]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "PCD8544",
+    "resolutions": [[84, 48]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "ST7567",
+    "resolutions": [[128, 64]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "ST7920",
+    "resolutions": [[128, 64]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "ST7735",
+    "resolutions": [[128, 160]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "ST7789V family",
+    "resolutions": [[135, 240], [170, 320], [172, 320], [240, 240], [240, 320]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "ILI9xxx family",
+    "resolutions": [[160, 160], [240, 240], [240, 320], [320, 240], [320, 480], [480, 320]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "QSPI / AMOLED family",
+    "resolutions": [[320, 240], [320, 480], [450, 600], [466, 466], [536, 240]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "MIPI RGB / DSI family",
+    "resolutions": [[320, 820], [480, 480], [720, 720], [720, 1280], [800, 480], [800, 800], [800, 1280], [1024, 600]],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "Waveshare e-paper family",
+    "resolutions": [[122, 250], [128, 250], [128, 296], [176, 264], [200, 200], [400, 300], [600, 448], [640, 384], [648, 480], [800, 480], [880, 528], [960, 680]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "WeAct e-paper family",
+    "resolutions": [[250, 122], [128, 296], [400, 300]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "Inkplate family",
+    "resolutions": [[800, 600], [960, 540], [1024, 758], [1200, 825], [1280, 720]],
+    "maxBpp": 1
+  },
+  {
+    "deviceName": "Addressable Light",
+    "resolutions": [],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "HUB75",
+    "resolutions": [],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "SDL",
+    "resolutions": [],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "RPI_DPI_RGB",
+    "resolutions": [],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "MIPI SPI / DSI / RGB CUSTOM",
+    "resolutions": [],
+    "maxBpp": 8
+  },
+  {
+    "deviceName": "ePaper SPI CUSTOM",
+    "resolutions": [],
+    "maxBpp": 1
+  }
+]
