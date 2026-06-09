@@ -11,14 +11,8 @@ import { loadCatalog, familyNames, weightsFor, ttfUrl } from "./catalog.js";
 import { createEngine } from "./ftengine.js";
 import { renderToCanvas, fitSize } from "./render.js";
 import { FontPicker } from "./FontPicker.jsx";
+import { DevicePresets } from "./DevicePresets.jsx";
 import { readUrlState, writeUrlState, PARAM_DEFAULTS } from "./urlState.js";
-
-// Common SSD1306-class OLED panels (and clones). The box is the fixed constraint.
-const DEVICES = [
-  { label: "128\u00d732", w: 128, h: 32 },
-  { label: "128\u00d764", w: 128, h: 64 },
-  { label: "128\u00d7128", w: 128, h: 128 },
-];
 
 const WEIGHT_LABELS = {
   100: "Thin",
@@ -220,22 +214,14 @@ export default function App() {
           <label class="field gdisplay">
           <span class="device-label">
             Display (px)
-            <span class="presets">
-              <For each={DEVICES}>
-                {(d) => (
-                  <button
-                    type="button"
-                    classList={{
-                      preset: true,
-                      active: device().w === d.w && device().h === d.h,
-                    }}
-                    onClick={() => setDevice({ w: d.w, h: d.h })}
-                  >
-                    {d.label}
-                  </button>
-                )}
-              </For>
-            </span>
+            <DevicePresets
+              value={device()}
+              onResolution={(r) => setDevice({ w: r.w, h: r.h })}
+              onDevice={(d) => {
+                setDevice({ w: d.w, h: d.h });
+                setBpp(d.bpp);
+              }}
+            />
           </span>
           <div class="device-row">
             <input
